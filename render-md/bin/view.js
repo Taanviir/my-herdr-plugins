@@ -3,7 +3,8 @@
 // The viewer. In its own pane it opens on the newest markdown file of the
 // folder you were in, or the one it was given, or the list of them; another
 // request swaps what it shows. The open file is watched, so an agent writing
-// it shows up as it goes. Opened from the popup tab strip, it is a popup tab.
+// it shows up as it goes, with what changed marked in the margin for a while.
+// Opened from the popup tab strip, it is a popup tab.
 
 const fs = require("node:fs");
 const path = require("node:path");
@@ -28,6 +29,10 @@ const MAX_WIDTH = 100;
 // Polling, because inotify does not see changes on WSL's /mnt drives.
 const WATCH_MS = 500;
 const WHEEL_ROWS = 3;
+// How long lines that just changed keep their mark.
+const CHANGED_MS = 8000;
+// The mark and a space before every line of the file.
+const MARGIN = 2;
 const ANSI = /\x1b\[[0-9;]*m/g;
 
 // A popup has no pane of its own, so Herdr gives it no pane id.
@@ -55,6 +60,8 @@ const state = {
   picker: null, // { title, items: [{ text, bold?, hint? }], index, choose(item) }
   history: [], // { file, top } for each link followed, so q goes back
   anchor: null, // the heading to show once the file is laid out
+  before: null, // the lines as they were before the file last changed
+  changed: null, // { lines: Set, timer }
   notice: null,
 };
 
@@ -104,6 +111,7 @@ function maxTop() {
 
 function open(file, { top = 0, anchor = null } = {}) {
   if (state.file) fs.unwatchFile(state.file);
+  clearChanged();
   Object.assign(state, {
     screen: "file",
     file,
@@ -118,9 +126,44 @@ function open(file, { top = 0, anchor = null } = {}) {
   fs.watchFile(file, { interval: WATCH_MS }, (now, before) => {
     if (now.mtimeMs === before.mtimeMs && now.size === before.size) return;
     state.stick = state.top > 0 && state.top >= maxTop();
+    if (state.rendered) state.before = state.rendered;
     load();
     ui.scheduleRender();
   });
+}
+
+function clearChanged() {
+  clearTimeout(state.changed?.timer);
+  state.changed = null;
+  state.before = null;
+}
+
+// Lines that were not there before, counting repeats, so a blank line or a
+// rule that moved down is not news.
+function markChanged(before, after) {
+  const plain = (line) => line.replace(ANSI, "");
+  const left = new Map();
+  for (const line of before.map(plain)) left.set(line, (left.get(line) ?? 0) + 1);
+  const lines = new Set();
+  after.map(plain).forEach((line, at) => {
+    const count = left.get(line) ?? 0;
+    if (count > 0) left.set(line, count - 1);
+    else if (line.trim()) lines.add(at);
+  });
+  clearTimeout(state.changed?.timer);
+  if (!lines.size) return (state.changed = null);
+  const timer = setTimeout(() => {
+    state.changed = null;
+    ui.scheduleRender();
+  }, CHANGED_MS);
+  state.changed = { lines, timer };
+}
+
+function jumpChanged() {
+  const lines = [...(state.changed?.lines ?? [])].sort((a, b) => a - b);
+  if (!lines.length) return (state.notice = "nothing changed lately");
+  const next = lines.find((line) => line > state.top + 2) ?? lines[0];
+  state.top = Math.max(0, next - 2);
 }
 
 // Links and anchors open in the viewer; q comes back to where you were.
@@ -211,7 +254,7 @@ function edit() {
 }
 
 function prepare(width) {
-  const room = Math.min(width, MAX_WIDTH);
+  const room = Math.min(width, MAX_WIDTH) - MARGIN;
   if (state.rendered?.width !== room) {
     state.rendered = {
       width: room,
@@ -219,6 +262,8 @@ function prepare(width) {
         ? { lines: [], headings: [] }
         : layout(state.text, room)),
     };
+    if (state.before?.width === room) markChanged(state.before.lines, state.rendered.lines);
+    state.before = null;
     if (state.anchor) goToAnchor(state.anchor);
     state.anchor = null;
   }
@@ -245,17 +290,23 @@ function fileBody(width, rows) {
         : state.top >= maxTop()
           ? "end"
           : `${Math.round((state.top / maxTop()) * 100)}%`;
+  const fresh = state.changed ? `${style.ok(`${state.changed.lines.size} changed`)}  ` : "";
   const out = [
     bar(
       title(width),
-      state.missing ? style.danger("file is gone") : style.dim(where),
+      state.missing ? style.danger("file is gone") : `${fresh}${style.dim(where)}`,
       width,
     ),
   ];
 
   for (let row = 0; row < state.page; row += 1) {
     const at = state.top + row;
-    out.push(at === state.match ? selected(lines[at], room) : (lines[at] ?? ""));
+    if (at >= lines.length) {
+      out.push("");
+      continue;
+    }
+    const mark = state.changed?.lines.has(at) ? style.ok("▎") : " ";
+    out.push(`${mark} ${at === state.match ? selected(lines[at], room) : lines[at]}`);
   }
 
   if (state.search !== null) {
@@ -269,7 +320,7 @@ function fileBody(width, rows) {
     state.notice
       ? style.warn(state.notice)
       : style.dim(
-          `↑↓ scroll · [ ] headings · o outline · l links · / find · e edit · q ${state.history.length ? "back" : "list"}`,
+          `↑↓ scroll · [ ] headings · o outline · l links · c changes · / find · e edit · q ${state.history.length ? "back" : "list"}`,
         ),
   );
   return { lines: out };
@@ -314,6 +365,7 @@ function fileKey(chunk, key) {
   else if (chunk === "/") state.search = "";
   else if (key.name === "o") openOutline();
   else if (key.name === "l") openLinks();
+  else if (key.name === "c") jumpChanged();
   else if (key.name === "e") edit();
   else if (key.name === "r") load();
   else if (key.name === "q") back();
