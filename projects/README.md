@@ -35,7 +35,7 @@ Prompt   Notes   Projects                                  66 projects · 1 runn
 | `↑` `↓`, `pgup` `pgdn` | choose |
 | `tab` | step into the project's sessions, and back |
 | `⏎` | go to the project, or reopen the session |
-| `ctrl+n` | start a new agent in the project, through [Quick Prompt](https://github.com/Taanviir/herdr-quick-prompt) |
+| `ctrl+n` | start a new agent in the project, through [Quick Prompt](../quick-prompt) |
 | `ctrl+o` | open the project's dev server in your browser |
 | `ctrl+x`, `ctrl+x` | stop it |
 | `alt+←` `alt+→` | switch to Prompt or Notes, keeping the project |
@@ -49,7 +49,7 @@ process holds which port.
 ## Install
 
 ```bash
-herdr plugin install Taanviir/herdr-projects
+herdr plugin install Taanviir/my-herdr-plugins/projects
 herdr plugin action invoke taanviir.projects.setup
 ```
 
@@ -100,8 +100,7 @@ npm test
 | `lib/servers.js` | grouping processes into dev servers |
 | `lib/open.js` | the command that opens a URL in your browser |
 
-`lib/shared/` is copied from Quick Prompt. Edit it there and run its
-`tools/sync-shared.js`; `test/shared.test.js` fails here until you do.
+The terminal plumbing it shares with the other plugins is in `../shared`.
 
 ## License
 

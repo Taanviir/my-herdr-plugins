@@ -15,7 +15,7 @@ prompt.
 ## Install
 
 ```bash
-herdr plugin install Taanviir/herdr-quick-prompt
+herdr plugin install Taanviir/my-herdr-plugins/quick-prompt
 herdr plugin action invoke taanviir.quick-prompt.setup
 ```
 
@@ -59,7 +59,7 @@ description = "Quick Prompt with the focused agent"
 | `ctrl+o` | model and effort (Claude Code and Codex) |
 | `ctrl+p` / `ctrl+x` | pick a preset / remove it |
 | `ctrl+r` | follow up on an agent that is already running |
-| `ctrl+s` | not now: save the prompt to [Scratchpad](https://github.com/Taanviir/herdr-scratchpad) as a note |
+| `ctrl+s` | not now: save the prompt to [Scratchpad](../scratchpad) as a note |
 | `ctrl+v` | paste from the system clipboard |
 | `alt+c` | copy the prompt to the system clipboard |
 | `ctrl+u` / `ctrl+y` | clear the prompt / bring it back |
@@ -120,7 +120,7 @@ Pick one and Enter sends your prompt to it instead of starting a new agent.
 landed. A blocked agent cannot be picked until you answer it in its own pane,
 since Herdr will not prompt it.
 
-**Saving for later.** With [Scratchpad](https://github.com/Taanviir/herdr-scratchpad)
+**Saving for later.** With [Scratchpad](../scratchpad)
 installed, `ctrl+s` turns the prompt into a note instead of launching it. The
 note is filed under the directory the prompt would have started in, and
 remembers the agent and branch you were looking at. From Scratchpad, `ctrl+n`
@@ -198,7 +198,7 @@ ever.
 
 Another plugin can open Quick Prompt with the prompt already written, so it
 gets the agent picker, destinations, presets and follow-ups without building
-its own. [Scratchpad](https://github.com/Taanviir/herdr-scratchpad) does this
+its own. [Scratchpad](../scratchpad) does this
 to hand notes to an agent.
 
 ```bash

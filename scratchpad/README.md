@@ -10,7 +10,7 @@ Later you can hand them to an agent.
 - Label notes with `#hashtags`, and give a note a date to pin it to the top.
 - Each note records where it came from: the folder (the git root if there is
   one), the branch, and the agent and session that were in front of you.
-- Hand notes to an agent through [Quick Prompt](https://github.com/Taanviir/herdr-quick-prompt):
+- Hand notes to an agent through [Quick Prompt](../quick-prompt):
   a new one in a tab, split or worktree, or one that is already running.
 - Reopen the Claude Code or Codex session a note came from.
 - Agents read and write the same notes with the `scratch` command.
@@ -19,9 +19,9 @@ Later you can hand them to an agent.
 ## Install
 
 ```bash
-herdr plugin install Taanviir/herdr-scratchpad
+herdr plugin install Taanviir/my-herdr-plugins/scratchpad
 herdr plugin action invoke taanviir.scratchpad.setup
-herdr plugin install Taanviir/herdr-quick-prompt   # to hand notes to agents
+herdr plugin install Taanviir/my-herdr-plugins/quick-prompt   # to hand notes to agents
 ```
 
 Setup binds **ctrl+b** then **a** in your `config.toml`, and links `scratch`
@@ -183,7 +183,7 @@ uv run --with pillow tools/screenshot.py docs/scratchpad-when.png --keys '\t' $D
 The version lives in `herdr-plugin.toml` and `package.json`, and the two must
 match. Merging a version bump to `main` runs the tests and publishes `vX.Y.Z`
 as a GitHub release. Install a specific release with
-`herdr plugin install Taanviir/herdr-scratchpad --ref vX.Y.Z`.
+`herdr plugin install Taanviir/my-herdr-plugins/scratchpad --ref scratchpad-vX.Y.Z`.
 
 ## License
 

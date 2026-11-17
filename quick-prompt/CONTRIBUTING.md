@@ -6,8 +6,8 @@ step — a checkout and Node 18+ is the whole setup.
 ## Running from a checkout
 
 ```bash
-git clone https://github.com/Taanviir/herdr-quick-prompt
-cd herdr-quick-prompt
+git clone https://github.com/Taanviir/my-herdr-plugins
+cd my-herdr-plugins/quick-prompt
 herdr plugin link .
 ```
 
@@ -38,18 +38,18 @@ testing the published copy.
 | `lib/picker/actions.js` | Launching, following up, saving a note, keeping the draft, quitting |
 | `lib/picker/editing.js` | The editing keys the prompt and the directory field share |
 | `bin/launch.js` | Detached worker: creates the tab, split, workspace or worktree, starts the agent, delivers the prompt; or sends a follow-up |
-| `lib/shared/herdr.js` | Herdr CLI wrapper — every call goes through `HERDR_BIN_PATH` |
+| `../shared/herdr.js` | Herdr CLI wrapper — every call goes through `HERDR_BIN_PATH` |
 | `lib/agents.js` | Agent catalog and its cache, which kinds take an inline prompt or a prompt file, the agent running in a pane |
-| `lib/shared/executables.js` | What is on `PATH`, one sweep per directory |
+| `../shared/executables.js` | What is on `PATH`, one sweep per directory |
 | `lib/models.js` | Models and efforts per kind for `ctrl+o`, and the launch flags they become |
-| `lib/shared/editor.js` | The prompt buffer: grapheme clusters, wrapping, cursor |
+| `../shared/editor.js` | The prompt buffer: grapheme clusters, wrapping, cursor |
 | `lib/history.js` | Walking earlier prompts with `↑`/`↓`, keeping the unsent draft aside |
-| `lib/shared/text.js` | Terminal-cell width and paste sanitising |
-| `lib/shared/ui.js` | Colours, padding, truncation, path shortening |
-| `lib/shared/clipboard.js` | Reading the system clipboard for `ctrl+v` |
-| `lib/shared/term.js` | Not used here: the popup loop the other plugins run on |
-| `lib/shared/tabs.js` | The Prompt · Notes · Projects strip, and switching between them |
-| `lib/shared/switch.js` | Detached: opens the popup a switch asked for, once this one has gone |
+| `../shared/text.js` | Terminal-cell width and paste sanitising |
+| `../shared/ui.js` | Colours, padding, truncation, path shortening |
+| `../shared/clipboard.js` | Reading the system clipboard for `ctrl+v` |
+| `../shared/term.js` | Not used here: the popup loop the other plugins run on |
+| `../shared/tabs.js` | The Prompt · Notes · Projects · Markdown strip, and switching between them |
+| `../shared/switch.js` | Detached: opens the popup a switch asked for, once this one has gone |
 | `lib/dropped.js` | Copying dropped files that would not survive until the agent reads them |
 | `lib/dirs.js` | Directory suggestions and path completion for `ctrl+d` |
 | `lib/running.js` | The running agents behind `ctrl+r`, waiting ones first |
@@ -58,15 +58,14 @@ testing the published copy.
 | `lib/scratchpad.js` | Saving a prompt as a Scratchpad note for `ctrl+s` |
 | `lib/presets.js` | Reading and checking `presets.json` from `HERDR_PLUGIN_CONFIG_DIR`, and wrapping a prompt in a preset |
 
-`lib/shared/` is the same in Scratchpad and Projects, and this repo holds the
-master copy. After editing it, run `node tools/sync-shared.js` to copy it into
-the sibling checkouts; `test/shared.test.js` fails in each repo until you do.
+`../shared/` holds the files every plugin in this repo uses. A change there
+reaches all four, so run the tests from the repo root.
 
 ## Things that will bite you
 
 **Never measure text with `.length`.** Width and cursor arithmetic is in
 terminal cells, not UTF-16 units — CJK is two cells wide, an emoji is one
-grapheme of several code units, a combining accent is zero. `lib/shared/text.js` owns
+grapheme of several code units, a combining accent is zero. `../shared/text.js` owns
 this; everything else goes through `displayWidth` and `clusters`.
 
 **The picker must not move its working directory.** The manifest launches it as

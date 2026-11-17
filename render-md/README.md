@@ -23,7 +23,7 @@ The pane follows the file, so you can watch an agent write a plan as it goes.
 ## Install
 
 ```bash
-herdr plugin install Taanviir/herdr-render-md
+herdr plugin install Taanviir/my-herdr-plugins/render-md
 herdr plugin action invoke taanviir.render-md.setup
 ```
 
@@ -90,4 +90,4 @@ herdr plugin link .
 node --test
 ```
 
-`lib/shared` is synced from herdr-quick-prompt; edit it there.
+The terminal plumbing it shares with the other plugins is in `../shared`.
