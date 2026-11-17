@@ -1,6 +1,6 @@
 id = "taanviir.render-md"
 name = "Render MD"
-version = "0.1.0"
+version = "0.2.0"
 min_herdr_version = "0.9.0"
 description = "Read markdown rendered in a pane beside your agent, live as it changes"
 platforms = ["linux", "macos", "windows"]
