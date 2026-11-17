@@ -1,0 +1,17 @@
+{
+  "name": "herdr-render-md",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Herdr plugin: read markdown rendered in a pane beside your agent, live as it changes",
+  "license": "MIT",
+  "bin": {
+    "mdr": "bin/mdr.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
