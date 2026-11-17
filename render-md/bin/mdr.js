@@ -11,8 +11,8 @@ const { show } = require("../lib/pane");
 
 const USAGE = `mdr: markdown, rendered
 
-  mdr [file]          show file in the viewer beside this pane; with no file,
-                      list the markdown files of this folder
+  mdr [file|folder]   show file in the viewer beside this pane; with a folder
+                      or nothing, list the markdown files there or here
   mdr --latest        show the newest markdown file of this folder
   mdr --print <file>  print it rendered (also outside Herdr); - reads stdin
       --width N         wrap at N columns`;
@@ -38,9 +38,15 @@ function main() {
   const inHerdr = process.env.HERDR_ENV === "1" && process.env.HERDR_PANE_ID;
 
   if (!flags.print && inHerdr && target !== "-") {
-    const file = target ? path.resolve(target) : null;
-    if (file && !fs.existsSync(file)) throw new Error(`${target}: no such file`);
-    const res = show({ cwd: process.cwd(), file, latest: flags.latest, pane: process.env.HERDR_PANE_ID });
+    const given = target ? path.resolve(target) : null;
+    if (given && !fs.existsSync(given)) throw new Error(`${target}: no such file or folder`);
+    const folder = given && fs.statSync(given).isDirectory();
+    const res = show({
+      cwd: folder ? given : process.cwd(),
+      file: folder ? null : given,
+      latest: flags.latest,
+      pane: process.env.HERDR_PANE_ID,
+    });
     if (!res.ok) throw new Error(res.message);
     return;
   }

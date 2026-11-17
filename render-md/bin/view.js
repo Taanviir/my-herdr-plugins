@@ -59,6 +59,7 @@ const state = {
   match: -1,
   picker: null, // { title, items: [{ text, bold?, hint? }], index, choose(item) }
   history: [], // { file, top } for each link followed, so q goes back
+  ups: [], // the folders ← left, so → can come back
   anchor: null, // the heading to show once the file is laid out
   before: null, // the lines as they were before the file last changed
   changed: null, // { lines: Set, timer }
@@ -89,7 +90,9 @@ function show({ cwd, file, latest }) {
   state.history = [];
   if (file) return open(path.resolve(state.cwd, file));
   state.list = markdownFiles(state.cwd);
-  if (latest && state.list.files[0]) return open(state.list.files[0].file);
+  state.ups = [];
+  const newest = state.list.files.find((entry) => !hidden(entry));
+  if (latest && newest) return open(newest.file);
   showList();
 }
 
@@ -436,10 +439,32 @@ function pickerKey(chunk, key) {
 
 // ---- the list -------------------------------------------------------------
 
+// Files under dot folders, such as .agents/skills, are tooling rather than
+// reading. A filter that starts with a dot brings them back.
+const hidden = (entry) => /(^|\/)\./.test(entry.rel);
+const showingHidden = () => state.query.split(/\s+/).some((term) => term.startsWith("."));
+
+function moveTo(cwd) {
+  Object.assign(state, { cwd, list: markdownFiles(cwd), query: "", index: 0, offset: 0 });
+}
+
+function up() {
+  const parent = path.dirname(state.list.root);
+  if (parent === state.list.root) return;
+  state.ups.push(state.cwd);
+  moveTo(parent);
+}
+
+function down() {
+  const cwd = state.ups.pop();
+  if (cwd) moveTo(cwd);
+}
+
 function visible() {
   const terms = state.query.toLowerCase().split(/\s+/).filter(Boolean);
+  const all = showingHidden();
   return state.list.files.filter((entry) =>
-    terms.every((term) => entry.rel.toLowerCase().includes(term)),
+    (all || !hidden(entry)) && terms.every((term) => entry.rel.toLowerCase().includes(term)),
   );
 }
 
@@ -453,7 +478,8 @@ function listBody(width, rows) {
   state.offset = scrollTo(state.index, state.offset, state.page);
 
   const name = `${style.bold("Markdown")}  ${style.dim(shortenPath(state.list.root, Math.floor(width / 2)))}`;
-  const count = `${entries.length} file${entries.length === 1 ? "" : "s"}`;
+  const tucked = showingHidden() ? 0 : state.list.files.filter(hidden).length;
+  const count = `${entries.length} file${entries.length === 1 ? "" : "s"}${tucked ? ` · ${tucked} in dot folders` : ""}`;
   const out = [bar(name, style.dim(count), width)];
   out.push(
     `${style.accent("›")} ${state.query || style.dim("type to filter")}`,
@@ -484,7 +510,7 @@ function listBody(width, rows) {
     );
   }
 
-  out.push(style.dim("↑↓ move · ⏎ open · esc close"));
+  out.push(style.dim(`↑↓ move · ⏎ open · ← up a folder${state.ups.length ? " · → back" : ""} · esc close`));
   return { lines: out, caret: { row: 1, col: 2 + displayWidth(state.query) } };
 }
 
@@ -499,6 +525,8 @@ function listKey(chunk, key) {
     open(entries[state.index].file);
   else if (key.name === "backspace") state.query = state.query.slice(0, -1);
   else if (key.ctrl && key.name === "u") state.query = "";
+  else if (key.name === "left") up();
+  else if (key.name === "right") down();
   else if (isPrintable(chunk, key)) {
     state.query += chunk;
     state.index = 0;

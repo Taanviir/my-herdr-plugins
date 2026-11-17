@@ -35,7 +35,9 @@ is left alone.
 ## The pane
 
 **The list.** Type to filter by path, `↑` `↓` to move, `⏎` to open, `esc` to
-clear the filter or close. Click a file to select it, click again to open.
+clear the filter or close. `←` goes up a folder and `→` comes back. Files under
+dot folders such as `.agents/skills` are left out; a filter that starts with a
+dot, like `.agents`, shows them. Click a file to select it, click again to open.
 
 **A file.**
 
@@ -64,6 +66,7 @@ a green mark for eight seconds, and the header says how many.
 mdr                      # list this folder's markdown files in the viewer
 mdr --latest             # show the newest one
 mdr PLAN.md              # show PLAN.md
+mdr ..                   # list the markdown files of the folder above
 mdr --print README.md    # print it rendered, in or out of Herdr
 cat notes.md | mdr -p -  # from stdin
 ```
