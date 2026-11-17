@@ -4,7 +4,7 @@
 // task boxes, quotes and GitHub alerts, tables, links, rules and front matter.
 // Inline HTML tags are dropped and their text kept. No images.
 
-const { clusters, clusterWidth, displayWidth } = require("./shared/text");
+const { clusters, clusterWidth, displayWidth } = require("../../shared/text");
 const { highlight } = require("./highlight");
 
 const BOLD = "1";

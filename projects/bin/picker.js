@@ -18,11 +18,11 @@ const { workspaceFor, paneRunning } = require("../lib/place");
 const { listeners, table, uptimeSecs } = require("../lib/procs");
 const { servers: findServers } = require("../lib/servers");
 const { opener } = require("../lib/open");
-const { Editor } = require("../lib/shared/editor");
-const { style, truncate, shortenPath, displayWidth } = require("../lib/shared/ui");
-const { runAsync, spawnDetached } = require("../lib/shared/herdr");
-const { STATE_DIR, start, editKey } = require("../lib/shared/term");
-const { strip, switchFor, switchTo } = require("../lib/shared/tabs");
+const { Editor } = require("../../shared/editor");
+const { style, truncate, shortenPath, displayWidth } = require("../../shared/ui");
+const { runAsync, spawnDetached } = require("../../shared/herdr");
+const { STATE_DIR, start, editKey } = require("../../shared/term");
+const { strip, switchFor, switchTo } = require("../../shared/tabs");
 
 const ACT = path.join(__dirname, "act.js");
 const INDEXER = path.join(__dirname, "..", "lib", "indexer.js");

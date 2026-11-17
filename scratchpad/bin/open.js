@@ -2,8 +2,8 @@
 
 // Action entrypoint: note where the user is, then open the popup there.
 
-const { run } = require("../lib/shared/herdr");
-const { context } = require("../lib/shared/term");
+const { run } = require("../../shared/herdr");
+const { context } = require("../../shared/term");
 
 const ctx = context();
 

@@ -8,7 +8,7 @@
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const { run } = require("./shared/herdr");
+const { run } = require("../../shared/herdr");
 
 const PLUGIN_ID = "taanviir.render-md";
 const TITLE = "Render MD";

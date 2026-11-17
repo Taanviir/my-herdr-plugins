@@ -3,7 +3,7 @@
 // Action entrypoint: show the newest markdown file of the focused pane's
 // folder in the viewer beside it.
 
-const { context } = require("../lib/shared/term");
+const { context } = require("../../shared/term");
 const { show } = require("../lib/pane");
 
 const ctx = context();

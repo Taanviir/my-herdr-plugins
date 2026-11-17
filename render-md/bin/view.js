@@ -20,9 +20,9 @@ const {
   truncate,
   shortenPath,
   displayWidth,
-} = require("../lib/shared/ui");
-const { start, isPrintable } = require("../lib/shared/term");
-const { strip, switchFor, switchTo } = require("../lib/shared/tabs");
+} = require("../../shared/ui");
+const { start, isPrintable } = require("../../shared/term");
+const { strip, switchFor, switchTo } = require("../../shared/tabs");
 
 // Prose past this width is hard to read, so wide panes keep a margin.
 const MAX_WIDTH = 100;

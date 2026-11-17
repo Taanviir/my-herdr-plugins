@@ -3,10 +3,10 @@
 // Every key and paste: the main screen's keys, the open overlay's, and telling
 // a paste apart from typing.
 
-const { Editor } = require("../shared/editor");
+const { Editor } = require("../../../shared/editor");
 const { clearDraft } = require("../state");
-const { sanitizePasted } = require("../shared/text");
-const { readClipboard, writeClipboard } = require("../shared/clipboard");
+const { sanitizePasted } = require("../../../shared/text");
+const { readClipboard, writeClipboard } = require("../../../shared/clipboard");
 const { stage } = require("../dropped");
 const { modelsFor } = require("../models");
 const { insideRepo } = require("../worktree");
@@ -15,7 +15,7 @@ const { content, scheduleRender, render } = require("./render");
 const { OVERLAYS, escapeOverlay, openRunning, openModels, openPresets, openDirectories } = require("./overlays");
 const { launch, saveNote, close, keepDraftSafely } = require("./actions");
 const { isNewline, editKey } = require("./editing");
-const { switchFor, switchTo } = require("../shared/tabs");
+const { switchFor, switchTo } = require("../../../shared/tabs");
 
 // A paste is a burst of keypresses: inside it a newline is content, not "launch",
 // and a tab is content, not "next agent". Bracketed paste gives explicit markers;

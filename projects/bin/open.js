@@ -3,9 +3,9 @@
 // Action entrypoint: open the popup where you are. Bound to a key through
 // [[keys.command]] in config.toml.
 
-const { run } = require("../lib/shared/herdr");
-const { context } = require("../lib/shared/term");
-const { TABS, envFor } = require("../lib/shared/tabs");
+const { run } = require("../../shared/herdr");
+const { context } = require("../../shared/term");
+const { TABS, envFor } = require("../../shared/tabs");
 
 const ctx = context();
 const where = { cwd: ctx.focused_pane_cwd ?? ctx.workspace_cwd, workspace: ctx.workspace_id, pane: ctx.focused_pane_id };

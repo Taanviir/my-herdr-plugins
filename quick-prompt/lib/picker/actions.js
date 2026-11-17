@@ -6,12 +6,12 @@
 
 const path = require("node:path");
 
-const { Editor } = require("../shared/editor");
+const { Editor } = require("../../../shared/editor");
 const { History } = require("../history");
-const { spawnDetached, notify } = require("../shared/herdr");
+const { spawnDetached, notify } = require("../../../shared/herdr");
 const { STATE_DIR, remember, readHistory, recordPrompt, writeRequest, saveDraft, clearDraft, logCrash } = require("../state");
-const { truncate } = require("../shared/ui");
-const { KITTY_OFF } = require("../shared/keys");
+const { truncate } = require("../../../shared/ui");
+const { KITTY_OFF } = require("../../../shared/keys");
 const { composePrompt } = require("../presets");
 const { insideRepo } = require("../worktree");
 const scratchpad = require("../scratchpad");
@@ -136,7 +136,7 @@ function saveNote() {
   const text = state.prompt.text.trim();
   if (!state.canSaveNote) {
     state.notice = state.handoff ? "this came from Scratchpad, so it is already a note there"
-      : "ctrl+s needs Scratchpad: herdr plugin install Taanviir/herdr-scratchpad";
+      : "ctrl+s needs Scratchpad: herdr plugin install Taanviir/my-herdr-plugins/scratchpad";
   } else if (!text) {
     state.notice = "type something to save as a note";
   } else {

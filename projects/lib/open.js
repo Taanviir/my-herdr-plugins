@@ -3,7 +3,7 @@
 // How to open a URL in your browser. Under WSL the browser is Windows', so
 // wslview, or failing that explorer.exe, rather than a Linux xdg-open.
 
-const { onPath, executablesOnPath } = require("./shared/executables");
+const { onPath, executablesOnPath } = require("../../shared/executables");
 
 function opener(url, env = process.env, platform = process.platform) {
   if (platform === "darwin") return ["open", url];

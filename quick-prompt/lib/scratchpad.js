@@ -1,13 +1,13 @@
 "use strict";
 
-// Scratchpad (github.com/Taanviir/herdr-scratchpad) keeps notes for later.
+// Scratchpad, the plugin beside this one, keeps notes for later.
 // When its `scratch` command is on PATH, ctrl+s saves the prompt there instead
 // of launching it: for the prompt that turns out not to be for right now.
 
 const fs = require("node:fs");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
-const { pathDirs, onPath } = require("./shared/executables");
+const { pathDirs, onPath } = require("../../shared/executables");
 
 const SAVE_TIMEOUT_MS = 5000;
 

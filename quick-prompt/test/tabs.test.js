@@ -7,7 +7,7 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const { test } = require("node:test");
 const { scratch } = require("./support/helpers");
-const { TABS, switchFor, program, pluginEnv, envFor } = require("../lib/shared/tabs");
+const { TABS, switchFor, program, pluginEnv, envFor } = require("../../shared/tabs");
 
 const tab = (id) => TABS.find((candidate) => candidate.id === id);
 
@@ -41,7 +41,7 @@ test("switching runs the next tab in the same process tree, and the last one clo
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "qp-tabs-"));
   scratch.push(dir);
   const log = path.join(dir, "log");
-  const tabsModule = path.resolve(__dirname, "../lib/shared/tabs.js");
+  const tabsModule = path.resolve(__dirname, "../../shared/tabs.js");
   // Notes switches on to Projects through the host; Projects just closes.
   fs.mkdirSync(path.join(dir, "sp"));
   fs.mkdirSync(path.join(dir, "pj"));

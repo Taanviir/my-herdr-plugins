@@ -5,7 +5,7 @@
 // what it acts on is what Herdr has now, not what the popup saw.
 
 const path = require("node:path");
-const { run, notify, HerdrError } = require("../lib/shared/herdr");
+const { run, notify, HerdrError } = require("../../shared/herdr");
 const { workspaceFor, paneRunning } = require("../lib/place");
 
 // Herdr opens one popup at a time, and says ui_busy until ours is gone.

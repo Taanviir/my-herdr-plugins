@@ -2,13 +2,13 @@
 
 // Painting the popup: the main screen row by row, or whichever overlay is open.
 
-const { style, pad, truncate, shortenPath, displayWidth } = require("../shared/ui");
+const { style, pad, truncate, shortenPath, displayWidth } = require("../../../shared/ui");
 const { modelLabel } = require("../models");
 const { composePrompt } = require("../presets");
 const { branchSlug } = require("../worktree");
 const { state, agent, destination, choice, missing, chipAgents } = require("./session");
 const { OVERLAYS } = require("./overlays");
-const { strip } = require("../shared/tabs");
+const { strip } = require("../../../shared/tabs");
 
 const SHORTCUTS = 9;
 const out = process.stdout;

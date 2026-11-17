@@ -14,7 +14,7 @@ const { notify } = require("./herdr");
 const { pad, truncate } = require("./ui");
 const { sanitizePasted } = require("./text");
 
-const STATE_DIR = process.env.HERDR_PLUGIN_STATE_DIR ?? path.join(__dirname, "..", "..", ".state");
+const STATE_DIR = process.env.HERDR_PLUGIN_STATE_DIR ?? path.join(process.cwd(), ".state");
 const GUTTER = 1;
 // A paste is a burst of keypresses: inside it a newline is content, not
 // "save". Bracketed paste gives explicit markers; the byte count covers

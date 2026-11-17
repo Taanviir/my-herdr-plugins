@@ -39,7 +39,7 @@ const POWERSHELL = {
 
 const TIMEOUT_MS = 3000;
 // Each popup is a new process, so the tool that worked is kept on disk.
-const STATE_DIR = process.env.HERDR_PLUGIN_STATE_DIR ?? path.join(__dirname, "..", "..", ".state");
+const STATE_DIR = process.env.HERDR_PLUGIN_STATE_DIR ?? path.join(process.cwd(), ".state");
 const CACHE = path.join(STATE_DIR, "clipboard.json");
 
 function remembered() {

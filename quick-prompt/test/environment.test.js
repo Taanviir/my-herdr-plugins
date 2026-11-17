@@ -44,8 +44,8 @@ test("the popup's own calls to herdr and git are bounded", () => {
   const written = [];
   const agents = load("lib/agents.js", {
     "node:child_process": { spawnSync },
-    "./shared/herdr": { BIN: "/usr/bin/herdr", runAsync() {} },
-    "./shared/executables": { pathDirs: () => [], executablesOnPath: () => new Set() },
+    "../../shared/herdr": { BIN: "/usr/bin/herdr", runAsync() {} },
+    "../../shared/executables": { pathDirs: () => [], executablesOnPath: () => new Set() },
     "./state": { readCache: () => null, writeCache: (...args) => written.push(args) },
   }).context.module.exports;
   assert.ok(agents.catalog().some((item) => item.kind === "claude"), "a silent herdr leaves the built-in list");
@@ -68,8 +68,8 @@ test("the agent catalog is kept until Herdr or PATH changes, and a fresh look re
   const cache = {};
   let spawned = 0;
   const open = (PATH) => load("lib/agents.js", {
-    "./shared/executables": load("lib/shared/executables.js", {}, null, { PATH }).context.module.exports,
-    "./shared/herdr": { BIN: bin, runAsync() {} },
+    "../../shared/executables": load("../shared/executables.js", {}, null, { PATH }).context.module.exports,
+    "../../shared/herdr": { BIN: bin, runAsync() {} },
     "./state": { readCache: (name) => cache[name] ?? null, writeCache: (name, value) => { cache[name] = JSON.parse(JSON.stringify(value)); } },
     "node:child_process": {
       spawnSync: () => { spawned += 1; return { status: 0, stdout: help }; },
@@ -98,7 +98,7 @@ test("the agent catalog is kept until Herdr or PATH changes, and a fresh look re
 
 test("PATH is swept once per directory however often it repeats", () => {
   const read = [];
-  const executables = load("lib/shared/executables.js", {
+  const executables = load("../shared/executables.js", {
     "node:fs": { readdirSync: (dir) => { read.push(dir); return dir === "/w" ? ["powershell.exe", "wsl.exe"] : ["codex"]; } },
   }, null, { PATH: "/a:/w:/a::/w" }).context.module.exports;
   assert.equal(executables.onPath("codex"), null, "unknown before a sweep");
@@ -112,7 +112,7 @@ test("PATH is swept once per directory however often it repeats", () => {
 test("Scratchpad is found from the catalog's PATH sweep, or by its one name before there is one", () => {
   const looked = [];
   const scratchpadWith = (onPath) => load("lib/scratchpad.js", {
-    "./shared/executables": { pathDirs: () => ["/a", "/b"], onPath: () => onPath },
+    "../../shared/executables": { pathDirs: () => ["/a", "/b"], onPath: () => onPath },
     "node:fs": { existsSync: (file) => { looked.push(file); return file === path.join("/b", "scratch"); } },
   }).context.module.exports;
   assert.equal(scratchpadWith(false).available(), false);
@@ -126,7 +126,7 @@ test("ctrl+v tries the reader that worked last, Windows' first under bare WSL, a
   const stateDir = fs.mkdtempSync(path.join(require("node:os").tmpdir(), "qp-clipboard-"));
   scratch.push(stateDir);
   const tried = [];
-  const clipboard = (PATH, env, working) => load("lib/shared/clipboard.js", {
+  const clipboard = (PATH, env, working) => load("../shared/clipboard.js", {
     "./executables": { onPath: (command) => (PATH ? PATH.includes(command) : null) },
     "node:child_process": {
       execFile: (command, _, __, done) => {
@@ -165,7 +165,7 @@ test("copying tries the writer that worked last, waits for it to exit, and remem
   fs.writeFileSync(path.join(stateDir, "clipboard.json"), JSON.stringify({ read: "wl-paste" }));
   const tried = [];
   const { EventEmitter } = require("node:events");
-  const clipboard = (env, working) => load("lib/shared/clipboard.js", {
+  const clipboard = (env, working) => load("../shared/clipboard.js", {
     "./executables": { onPath: () => null },
     "node:child_process": {
       spawn: (command) => {
@@ -199,7 +199,7 @@ test("copying tries the writer that worked last, waits for it to exit, and remem
 test("looking up the running agent is bounded and gives up quietly", async () => {
   const calls = [];
   const lookup = (reply) => load("lib/agents.js", {
-    "./shared/herdr": { BIN: "herdr", runAsync: async (args, options) => { calls.push({ args, options }); return reply; } },
+    "../../shared/herdr": { BIN: "herdr", runAsync: async (args, options) => { calls.push({ args, options }); return reply; } },
   }).context.module.exports.runningAgent;
 
   const found = await lookup({ ok: true, result: { agents: [{ agent: "pi", pane_id: "w1:p2", foreground_cwd: "/src" }] } })("w1:p2");

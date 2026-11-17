@@ -8,17 +8,17 @@ const fs = require("node:fs");
 const path = require("node:path");
 const store = require("../lib/store");
 const { describe, relatedTo } = require("../lib/source");
-const { Editor } = require("../lib/shared/editor");
-const { style, tint, pad, truncate, shortenPath, displayWidth } = require("../lib/shared/ui");
-const { strip, switchFor, switchTo } = require("../lib/shared/tabs");
+const { Editor } = require("../../shared/editor");
+const { style, tint, pad, truncate, shortenPath, displayWidth } = require("../../shared/ui");
+const { strip, switchFor, switchTo } = require("../../shared/tabs");
 const { compose } = require("../lib/brief");
 const { labels, title, known, group, partialTag } = require("../lib/labels");
 const when = require("../lib/when");
-const { run, spawnDetached } = require("../lib/shared/herdr");
-const { readClipboard, writeClipboard } = require("../lib/shared/clipboard");
-const { sanitizePasted } = require("../lib/shared/text");
+const { run, spawnDetached } = require("../../shared/herdr");
+const { readClipboard, writeClipboard } = require("../../shared/clipboard");
+const { sanitizePasted } = require("../../shared/text");
 const { relink } = require("../lib/link");
-const { STATE_DIR, start, isNewline, isPrintable, editKey } = require("../lib/shared/term");
+const { STATE_DIR, start, isNewline, isPrintable, editKey } = require("../../shared/term");
 
 const LAUNCHER = path.join(__dirname, "launch.js");
 const DRAFT = path.join(STATE_DIR, "draft.txt");
@@ -562,7 +562,7 @@ const QUICK_PROMPT = "taanviir.quick-prompt";
 function handOff() {
   const listed = run(["plugin", "list", "--plugin", QUICK_PROMPT, "--json"], { check: false, timeout: 1000 });
   if (!listed.ok || !listed.result.plugins?.some((plugin) => plugin.enabled)) {
-    state.notice = "needs Quick Prompt: herdr plugin install Taanviir/herdr-quick-prompt";
+    state.notice = "needs Quick Prompt: herdr plugin install Taanviir/my-herdr-plugins/quick-prompt";
     return;
   }
   const notes = targets();

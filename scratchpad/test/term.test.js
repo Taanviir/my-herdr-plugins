@@ -2,7 +2,7 @@
 
 const test = require("node:test");
 const assert = require("node:assert");
-const { Editor } = require("../lib/shared/editor");
+const { Editor } = require("../../shared/editor");
 
 test("a paste far past the argument limit goes in whole", () => {
   const editor = new Editor("ab");

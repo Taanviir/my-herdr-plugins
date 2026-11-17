@@ -8,7 +8,7 @@ const path = require("node:path");
 const store = require("./store");
 const { relatedTo } = require("./source");
 const { short } = require("./when");
-const { run, spawnDetached } = require("./shared/herdr");
+const { run, spawnDetached } = require("../../shared/herdr");
 
 const SOURCE = "taanviir.scratchpad";
 const WORKER = path.join(__dirname, "..", "bin", "sidebar.js");
