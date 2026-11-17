@@ -12,6 +12,7 @@ The pane follows the file, so you can watch an agent write a plan as it goes.
   quotes, GitHub alerts, tables, rules, front matter, and code blocks with
   colours for common languages and diffs.
 - Jump between headings, or pick one from an outline. Scroll with the wheel.
+- Follow links to other markdown files in the repo, and come back with `q`.
 - Also a **Markdown** tab in the popup strip shared with Quick Prompt,
   Scratchpad and Projects (`alt+←→`).
 - `mdr` opens a file from the shell, or prints it rendered with `--print`.
@@ -44,10 +45,11 @@ clear the filter or close. Click a file to select it, click again to open.
 | `g` / `G` | top / end |
 | `[` / `]` | previous / next heading |
 | `o` | outline: pick a heading with `↑` `↓` and `⏎` |
+| `l` | links to other markdown files and headings; `⏎` follows one |
 | `/` then `n` `N` | find, next, previous |
 | `e` | edit in `$VISUAL`, `$EDITOR` or nvim; the view reloads after |
 | `r` | reload |
-| `q` `esc` | back to the list |
+| `q` `esc` | back to the file you followed a link from, or to the list |
 
 The file is checked for changes twice a second. If you are at the end when it
 grows, the view stays at the end.

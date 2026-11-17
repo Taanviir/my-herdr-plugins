@@ -12,6 +12,7 @@ const { layout } = require("../lib/render");
 const { markdownFiles, age } = require("../lib/files");
 const { relink } = require("../lib/link");
 const { onRequest } = require("../lib/pane");
+const { localLinks, slug } = require("../lib/links");
 const {
   style,
   pad,
@@ -35,13 +36,13 @@ const popup = !pane;
 const CHROME = popup ? 1 : 0;
 
 const state = {
-  screen: "list", // list | file | outline
+  screen: "list", // list | file | picker
   cwd: process.env.RENDER_MD_CWD || process.cwd(),
   list: { root: "", files: [] },
   query: "",
   index: 0,
   offset: 0,
-  page: 1, // rows of the list, file or outline on screen, as of the last frame
+  page: 1, // rows of the list, file or picker on screen, as of the last frame
   file: null,
   text: "",
   missing: false,
@@ -51,7 +52,9 @@ const state = {
   search: null, // what is being typed after /
   found: "",
   match: -1,
-  outline: 0,
+  picker: null, // { title, items: [{ text, bold?, hint? }], index, choose(item) }
+  history: [], // { file, top } for each link followed, so q goes back
+  anchor: null, // the heading to show once the file is laid out
   notice: null,
 };
 
@@ -76,6 +79,7 @@ function scrollTo(index, offset, height) {
 // { cwd?, file?, latest? }: a file, the newest one in cwd, or the list.
 function show({ cwd, file, latest }) {
   if (cwd) state.cwd = cwd;
+  state.history = [];
   if (file) return open(path.resolve(state.cwd, file));
   state.list = markdownFiles(state.cwd);
   if (latest && state.list.files[0]) return open(state.list.files[0].file);
@@ -98,12 +102,13 @@ function maxTop() {
   return Math.max(0, (state.rendered?.lines.length ?? 0) - state.page);
 }
 
-function open(file) {
+function open(file, { top = 0, anchor = null } = {}) {
   if (state.file) fs.unwatchFile(state.file);
   Object.assign(state, {
     screen: "file",
     file,
-    top: 0,
+    top,
+    anchor,
     match: -1,
     found: "",
     search: null,
@@ -118,6 +123,22 @@ function open(file) {
   });
 }
 
+// Links and anchors open in the viewer; q comes back to where you were.
+function follow({ file, anchor }) {
+  if (file === state.file) {
+    state.screen = "file";
+    return goToAnchor(anchor);
+  }
+  state.history.push({ file: state.file, top: state.top });
+  open(file, { anchor: anchor || null });
+}
+
+function goToAnchor(anchor) {
+  const heading = headings().find((h) => slug(h.text) === anchor);
+  if (heading) state.top = heading.line;
+  else state.notice = `no heading "#${anchor}" in this file`;
+}
+
 function showList() {
   if (state.file) fs.unwatchFile(state.file);
   if (!state.list.root) state.list = markdownFiles(state.cwd);
@@ -129,6 +150,8 @@ function showList() {
 }
 
 function back() {
+  const previous = state.history.pop();
+  if (previous) return open(previous.file, { top: previous.top });
   state.list = markdownFiles(state.cwd);
   showList();
 }
@@ -196,6 +219,8 @@ function prepare(width) {
         ? { lines: [], headings: [] }
         : layout(state.text, room)),
     };
+    if (state.anchor) goToAnchor(state.anchor);
+    state.anchor = null;
   }
   return room;
 }
@@ -230,9 +255,7 @@ function fileBody(width, rows) {
 
   for (let row = 0; row < state.page; row += 1) {
     const at = state.top + row;
-    out.push(
-      at === state.match ? selected(lines[at], room) : (lines[at] ?? ""),
-    );
+    out.push(at === state.match ? selected(lines[at], room) : (lines[at] ?? ""));
   }
 
   if (state.search !== null) {
@@ -246,7 +269,7 @@ function fileBody(width, rows) {
     state.notice
       ? style.warn(state.notice)
       : style.dim(
-          "↑↓ scroll · [ ] headings · o outline · / find · e edit · q list",
+          `↑↓ scroll · [ ] headings · o outline · l links · / find · e edit · q ${state.history.length ? "back" : "list"}`,
         ),
   );
   return { lines: out };
@@ -290,68 +313,73 @@ function fileKey(chunk, key) {
   else if (key.name === "n") find(chunk === "N" ? -1 : 1);
   else if (chunk === "/") state.search = "";
   else if (key.name === "o") openOutline();
+  else if (key.name === "l") openLinks();
   else if (key.name === "e") edit();
   else if (key.name === "r") load();
   else if (key.name === "q") back();
 }
 
-// ---- the outline ----------------------------------------------------------
+// ---- pickers: the outline and the links ---------------------------------
+
+function pick(title, items, index, choose) {
+  state.picker = { title, items, index: Math.max(0, index), choose };
+  state.offset = 0;
+  state.screen = "picker";
+}
 
 function openOutline() {
-  if (!headings().length) {
-    state.notice = "no headings in this file";
-    return;
-  }
+  if (!headings().length) return (state.notice = "no headings in this file");
+  const items = headings().map((h) => ({ text: `${"  ".repeat(h.level - 1)}${h.text}`, bold: h.level <= 2, line: h.line }));
   const above = headings().findLastIndex((h) => h.line <= state.top);
-  state.outline = Math.max(0, above);
-  state.offset = 0;
-  state.screen = "outline";
+  pick("outline", items, above, (item) => {
+    state.top = item.line;
+    state.screen = "file";
+  });
 }
 
-function goToHeading(index) {
-  const heading = headings()[index];
-  if (heading) state.top = heading.line;
-  state.screen = "file";
+function openLinks() {
+  const links = state.missing ? [] : localLinks(state.text, state.file);
+  if (!links.length) return (state.notice = "no links to other markdown here");
+  const items = links.map((link) => {
+    const where = link.file === state.file ? "" : path.relative(path.dirname(state.file), link.file);
+    return { text: link.label, hint: `${where}${link.anchor ? `#${link.anchor}` : ""}`, link };
+  });
+  pick("links", items, 0, (item) => follow(item.link));
 }
 
-function outlineBody(width, rows) {
+function pickerBody(width, rows) {
   prepare(width);
-  const list = headings();
+  const picker = state.picker;
   state.page = Math.max(1, rows - 2);
-  state.outline = Math.min(Math.max(0, state.outline), list.length - 1);
-  state.offset = scrollTo(state.outline, state.offset, state.page);
+  picker.index = Math.min(Math.max(0, picker.index), picker.items.length - 1);
+  state.offset = scrollTo(picker.index, state.offset, state.page);
 
-  const out = [bar(title(width), style.dim("outline"), width)];
+  const out = [bar(title(width), style.dim(picker.title), width)];
   for (let row = 0; row < state.page; row += 1) {
     const at = state.offset + row;
-    const heading = list[at];
-    if (!heading) {
+    const item = picker.items[at];
+    if (!item) {
       out.push("");
       continue;
     }
-    const text = truncate(
-      `${"  ".repeat(heading.level - 1)}${heading.text}`,
-      width,
-    );
-    out.push(
-      at === state.outline
-        ? selected(text, width)
-        : heading.level <= 2
-          ? style.bold(text)
-          : text,
-    );
+    const hint = item.hint ? `  ${item.hint}` : "";
+    const text = truncate(`${item.text}${hint}`, width);
+    if (at === picker.index) out.push(selected(text, width));
+    else if (hint) out.push(`${item.text}${style.dim(text.slice(item.text.length))}`);
+    else out.push(item.bold ? style.bold(text) : text);
   }
   out.push(style.dim("↑↓ move · ⏎ go · esc back"));
   return { lines: out };
 }
 
-function outlineKey(chunk, key) {
-  if (key.name === "up" || key.name === "k") state.outline -= 1;
-  else if (key.name === "down" || key.name === "j") state.outline += 1;
-  else if (key.name === "pageup") state.outline -= state.page;
-  else if (key.name === "pagedown") state.outline += state.page;
-  else if (key.name === "return") goToHeading(state.outline);
-  else if (key.name === "q" || key.name === "o") state.screen = "file";
+function pickerKey(chunk, key) {
+  const picker = state.picker;
+  if (key.name === "up" || key.name === "k") picker.index -= 1;
+  else if (key.name === "down" || key.name === "j") picker.index += 1;
+  else if (key.name === "pageup") picker.index -= state.page;
+  else if (key.name === "pagedown") picker.index += state.page;
+  else if (key.name === "return" && picker.items[picker.index]) picker.choose(picker.items[picker.index]);
+  else if (key.name === "q" || key.name === "o" || key.name === "l") state.screen = "file";
 }
 
 // ---- the list -------------------------------------------------------------
@@ -438,12 +466,13 @@ function onMouse({ button, row, release }) {
   const line = row - CHROME;
   if (state.screen === "file") {
     state.top += wheel;
-  } else if (state.screen === "outline") {
-    if (wheel) state.outline += wheel;
+  } else if (state.screen === "picker") {
+    const picker = state.picker;
+    if (wheel) picker.index += wheel;
     else if (base === 0 && !release && line >= 1 && line <= state.page) {
       const at = state.offset + line - 1;
-      if (at === state.outline) goToHeading(at);
-      else state.outline = at;
+      if (at === picker.index && picker.items[at]) picker.choose(picker.items[at]);
+      else if (picker.items[at]) picker.index = at;
     }
   } else if (wheel) {
     state.index += wheel;
@@ -460,7 +489,7 @@ function onMouse({ button, row, release }) {
 const SCREENS = {
   list: { body: listBody, key: listKey },
   file: { body: fileBody, key: fileKey },
-  outline: { body: outlineBody, key: outlineKey },
+  picker: { body: pickerBody, key: pickerKey },
 };
 
 relink();
@@ -491,7 +520,7 @@ const ui = start({
     SCREENS[state.screen].key(chunk, key);
   },
   onEscape: () => {
-    if (state.screen === "outline") state.screen = "file";
+    if (state.screen === "picker") state.screen = "file";
     else if (state.screen === "file" && state.search !== null)
       state.search = null;
     else if (state.screen === "file") back();
