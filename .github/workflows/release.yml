@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm test
+
+      # A plugin gets a release when its version is one that has no tag yet:
+      # quick-prompt-v0.8.8 and the like. Pushing without a bump releases nothing.
+      - name: Release each plugin whose version is new
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for manifest in */herdr-plugin.toml; do
+            dir=$(dirname "$manifest")
+            version=$(sed -n 's/^version = "\(.*\)"/\1/p' "$manifest")
+            package=$(node -p "require('./$dir/package.json').version")
+            if [ "$version" != "$package" ]; then
+              echo "$dir: herdr-plugin.toml $version, package.json $package" >&2
+              exit 1
+            fi
+            tag="$dir-v$version"
+            if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+              continue
+            fi
+            gh release create "$tag" \
+              --target "$GITHUB_SHA" \
+              --title "$tag" \
+              --latest=false \
+              --notes "Install or update:
+
+          \`\`\`bash
+          herdr plugin install Taanviir/my-herdr-plugins/$dir --ref $tag
+          \`\`\`
+          "
+          done

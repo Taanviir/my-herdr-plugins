@@ -1,0 +1,12 @@
+{
+  "name": "my-herdr-plugins",
+  "private": true,
+  "description": "Herdr plugins: Quick Prompt, Scratchpad, Projects and Render MD",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test shared/test/*.test.js quick-prompt/test/*.test.js scratchpad/test/*.test.js projects/test/*.test.js render-md/test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
