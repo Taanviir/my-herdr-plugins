@@ -2,7 +2,12 @@
 
 const { spawnSync, spawn, execFile } = require("node:child_process");
 
-const BIN = process.env.HERDR_BIN_PATH ?? "herdr";
+// Under `node --test` the real Herdr is out of reach, even from inside a Herdr
+// pane, unless a test names a fake in HERDR_TEST_BIN: a test that missed its
+// mock fails instead of opening tabs and starting agents in your session.
+const BIN = process.env.NODE_TEST_CONTEXT
+  ? process.env.HERDR_TEST_BIN ?? "false"
+  : process.env.HERDR_BIN_PATH ?? "herdr";
 
 class HerdrError extends Error {
   constructor(message, { args, stderr, status } = {}) {

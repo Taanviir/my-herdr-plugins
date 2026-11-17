@@ -62,7 +62,7 @@ test("switching runs the next tab in the same process tree, and the last one clo
   fs.writeFileSync(herdr, `#!/bin/sh\ncat <<'EOF'\n${JSON.stringify(list)}\nEOF\n`, { mode: 0o755 });
 
   const driver = `require(${JSON.stringify(tabsModule)}).switchTo(require(${JSON.stringify(tabsModule)}).TABS[1], { cwd: "/repo/a" }, () => require("fs").appendFileSync(${JSON.stringify(log)}, "kept\\n"));`;
-  const env = { ...process.env, HERDR_BIN_PATH: herdr, HERDR_PLUGIN_STATE_DIR: path.join(dir, "state", "taanviir.quick-prompt") };
+  const env = { ...process.env, HERDR_BIN_PATH: herdr, HERDR_TEST_BIN: herdr, HERDR_PLUGIN_STATE_DIR: path.join(dir, "state", "taanviir.quick-prompt") };
   delete env.HERDR_TABS_HOSTED;
   const res = spawnSync(process.execPath, ["-e", driver], { env, encoding: "utf8", timeout: 10000 });
 
