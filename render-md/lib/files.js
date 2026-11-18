@@ -8,7 +8,13 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
 const EXTENSIONS = /\.(md|markdown|mdx)$/i;
-const SKIP = new Set(["node_modules", "vendor", "dist", "build", "target", "out", "__pycache__"]);
+// Dot folders are walked, since the viewer can show them with alt+h; these
+// hold nothing anyone reads, or far too much.
+const SKIP = new Set([
+  "node_modules", "vendor", "dist", "build", "target", "out", "__pycache__",
+  ".git", ".cache", ".npm", ".venv", "venv", ".next", ".turbo", ".cargo", ".rustup", ".local",
+  ".vscode-server", ".bun", ".nvm", ".pnpm-store", ".gradle", ".m2",
+]);
 const MAX_DEPTH = 6;
 const MAX_FILES = 5000;
 
@@ -40,7 +46,7 @@ function walk(root) {
       if (found.length >= MAX_FILES) return;
       const rel = dir ? `${dir}/${entry.name}` : entry.name;
       if (entry.isDirectory()) {
-        if (depth < MAX_DEPTH && !entry.name.startsWith(".") && !SKIP.has(entry.name)) visit(rel, depth + 1);
+        if (depth < MAX_DEPTH && !SKIP.has(entry.name)) visit(rel, depth + 1);
       } else if (EXTENSIONS.test(entry.name)) {
         found.push(rel);
       }

@@ -18,10 +18,10 @@ function folder(files) {
   return root;
 }
 
-test("outside git: markdown files newest first, skipping dot folders and node_modules", () => {
-  const root = folder({ "old.md": 1000, "docs/new.markdown": 3000, "notes.txt": 4000, ".hidden/a.md": 5000, "node_modules/b.md": 5000 });
+test("outside git: markdown files newest first, dot folders included, node_modules and .git skipped", () => {
+  const root = folder({ "old.md": 1000, "docs/new.markdown": 3000, "notes.txt": 4000, ".claude/skills/a.md": 5000, "node_modules/b.md": 5000, ".git/c.md": 5000 });
   const { files } = markdownFiles(root);
-  assert.deepEqual(files.map((f) => f.rel), ["docs/new.markdown", "old.md"]);
+  assert.deepEqual(files.map((f) => f.rel), [".claude/skills/a.md", "docs/new.markdown", "old.md"]);
 });
 
 test("inside git: tracked and untracked files, without ignored ones", () => {
