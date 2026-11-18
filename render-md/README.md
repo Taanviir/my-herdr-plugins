@@ -36,8 +36,8 @@ is left alone.
 
 **The list.** Type to filter by path, `↑` `↓` to move, `⏎` to open, `esc` to
 clear the filter or close. `←` goes up a folder and `→` comes back. Files under
-dot folders such as `.agents/skills` are left out; a filter that starts with a
-dot, like `.agents`, shows them. Click a file to select it, click again to open.
+dot folders such as `.agents/skills` are left out; `alt+h` shows or hides them,
+and a filter that starts with a dot, like `.agents`, shows them too. Click a file to select it, click again to open.
 
 **A file.**
 

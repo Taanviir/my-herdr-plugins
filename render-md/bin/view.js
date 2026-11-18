@@ -60,6 +60,7 @@ const state = {
   picker: null, // { title, items: [{ text, bold?, hint? }], index, choose(item) }
   history: [], // { file, top } for each link followed, so q goes back
   ups: [], // the folders ← left, so → can come back
+  dotted: false, // alt+h: list files under dot folders too
   anchor: null, // the heading to show once the file is laid out
   before: null, // the lines as they were before the file last changed
   changed: null, // { lines: Set, timer }
@@ -440,9 +441,9 @@ function pickerKey(chunk, key) {
 // ---- the list -------------------------------------------------------------
 
 // Files under dot folders, such as .agents/skills, are tooling rather than
-// reading. A filter that starts with a dot brings them back.
+// reading. alt+h, or a filter that starts with a dot, brings them back.
 const hidden = (entry) => /(^|\/)\./.test(entry.rel);
-const showingHidden = () => state.query.split(/\s+/).some((term) => term.startsWith("."));
+const showingHidden = () => state.dotted || state.query.split(/\s+/).some((term) => term.startsWith("."));
 
 function moveTo(cwd) {
   Object.assign(state, { cwd, list: markdownFiles(cwd), query: "", index: 0, offset: 0 });
@@ -479,7 +480,8 @@ function listBody(width, rows) {
 
   const name = `${style.bold("Markdown")}  ${style.dim(shortenPath(state.list.root, Math.floor(width / 2)))}`;
   const tucked = showingHidden() ? 0 : state.list.files.filter(hidden).length;
-  const count = `${entries.length} file${entries.length === 1 ? "" : "s"}${tucked ? ` · ${tucked} in dot folders` : ""}`;
+  const dots = state.dotted ? " · with dot folders" : tucked ? ` · ${tucked} in dot folders` : "";
+  const count = `${entries.length} file${entries.length === 1 ? "" : "s"}${dots}`;
   const out = [bar(name, style.dim(count), width)];
   out.push(
     `${style.accent("›")} ${state.query || style.dim("type to filter")}`,
@@ -510,7 +512,7 @@ function listBody(width, rows) {
     );
   }
 
-  out.push(style.dim(`↑↓ move · ⏎ open · ← up a folder${state.ups.length ? " · → back" : ""} · esc close`));
+  out.push(style.dim(`↑↓ move · ⏎ open · ← up a folder${state.ups.length ? " · → back" : ""} · alt+h dot folders · esc close`));
   return { lines: out, caret: { row: 1, col: 2 + displayWidth(state.query) } };
 }
 
@@ -525,6 +527,7 @@ function listKey(chunk, key) {
     open(entries[state.index].file);
   else if (key.name === "backspace") state.query = state.query.slice(0, -1);
   else if (key.ctrl && key.name === "u") state.query = "";
+  else if (key.meta && key.name === "h") state.dotted = !state.dotted;
   else if (key.name === "left") up();
   else if (key.name === "right") down();
   else if (isPrintable(chunk, key)) {
