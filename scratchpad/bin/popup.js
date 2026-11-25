@@ -85,7 +85,7 @@ function attempt(change) {
 }
 
 function reload() {
-  const all = store.readAll().sort((a, b) => b.created.localeCompare(a.created));
+  const all = store.readAll();
   state.counts = TABS.map((tab) => all.filter(tab.show).length);
   state.labels = known(all);
   // Open notes with a date sit above the labels, soonest first.

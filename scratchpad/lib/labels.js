@@ -29,9 +29,10 @@ function known(notes) {
 }
 
 // Notes under their first label, the biggest group first, unlabelled last.
+// Within a group, oldest first, so notes written as a sequence read in order.
 function group(notes) {
   const groups = new Map();
-  for (const note of notes) {
+  for (const note of [...notes].sort((a, b) => String(a.created).localeCompare(String(b.created)))) {
     const name = labels(note.text)[0] ?? null;
     groups.set(name, [...(groups.get(name) ?? []), note]);
   }
