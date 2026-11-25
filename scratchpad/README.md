@@ -127,6 +127,7 @@ add something like this to your `AGENTS.md` or `CLAUDE.md`:
 - `scratch list` shows my open notes for this repo. Check it at the start of a task.
 - When you notice something out of scope, `scratch add "<what and why>"` instead of doing it.
 - When you finish a note you were given, `scratch done <id>`.
+- The list shows only a note's first line, so make it the gist and put detail after it.
 ```
 
 ## On the sidebar
